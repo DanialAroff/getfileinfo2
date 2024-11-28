@@ -1,16 +1,9 @@
-# file_info
+# getfileinfo2
 
-A new Flutter project.
+Enter file/directory path(s) to get the file size and modified date.
 
-## Getting Started
+![{7631871B-B324-4BDA-B398-4292706B29C0}](https://github.com/user-attachments/assets/cb622a69-2650-461b-ba02-eae9135b3144)
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Build instructions
+TBC
