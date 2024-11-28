@@ -26,7 +26,7 @@ void main() async {
       await windowManager.focus();
     });
     setWindowTitle('GetFileInfo2');
-    
+
     windowManager.setMaximumSize(const Size(800, 600));
     windowManager.setMinimumSize(const Size(800, 480));
   }
@@ -78,6 +78,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _directoryController = TextEditingController();
+  // To manage focus state of widget
+  final _focusNode = FocusNode();
   List<FileSystemEntity> _files = [];
   bool start = true;
 
@@ -96,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       final filesList = directory.list();
+      // debugPrint(filesList)
       Iterable<FileSystemEntity> files = await filesList.toList();
       files = files.where((file) =>
           file.statSync().type == FileSystemEntityType.file ||
@@ -114,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
       itemBuilder: (context, index) {
         final file = _files[index];
         debugPrint(path.basename(file.path));
-        debugPrint(file.statSync().toString());
+        // debugPrint(file.statSync().toString());
         return FileListItem(
           file: file,
           tileColor: index % 2 == 0 ? Colors.grey.shade200 : null,
@@ -133,15 +136,17 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: Platform.isWindows ? null : AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      appBar: Platform.isWindows
+          ? null
+          : AppBar(
+              // TRY THIS: Try changing the color here to a specific color (to
+              // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+              // change color while the other colors stay the same.
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              // Here we take the value from the MyHomePage object that was created by
+              // the App.build method, and use it to set our appbar title.
+              title: Text(widget.title),
+            ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -170,6 +175,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   Expanded(
                     flex: 3,
                     child: TextField(
+                      focusNode: _focusNode,
+                      onSubmitted: (_) {
+                        _scanDirectory();
+                        // To maintain focus even after hitting enter
+                        _focusNode.requestFocus();
+                      },
                       cursorColor: Colors.white,
                       controller: _directoryController,
                       style: const TextStyle(
@@ -216,8 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text(
                 '${_files.length} item(s)',
                 style: const TextStyle(
-                    fontSize: 13.0,
-                    color: Color.fromARGB(221, 53, 53, 53)),
+                    fontSize: 13.0, color: Color.fromARGB(221, 53, 53, 53)),
               ),
             ),
             Expanded(
@@ -234,5 +244,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 }
