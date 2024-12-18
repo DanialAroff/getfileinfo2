@@ -3,9 +3,11 @@ import 'dart:ui';
 
 import 'package:file_info/ui/widget/filelistitem.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:path/path.dart' as path;
 import 'package:window_size/window_size.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +33,14 @@ void main() async {
     windowManager.setMinimumSize(const Size(800, 480));
   }
 
+  // Request permission for Android
+  if (Platform.isAndroid) {
+    PermissionStatus access = await Permission.manageExternalStorage.status;
+    if (access.isDenied) {
+      access = await Permission.manageExternalStorage.request();
+    }
+  }
+
   runApp(const MyApp());
 }
 
@@ -44,25 +54,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: '<>'),
+      home: const MyHomePage(title: 'GetFileInfo2'),
     );
   }
 }
@@ -84,10 +79,14 @@ class _MyHomePageState extends State<MyHomePage> {
   bool start = true;
 
   void _scanDirectory() async {
-    final directoryPath = _directoryController.text;
+    String directoryPath = _directoryController.text;
     start = false;
 
-    if (_directoryController.text == '') {
+    if (Platform.isAndroid) {
+      directoryPath = './storage/emulated/0/${_directoryController.text}';
+    }
+
+    if (directoryPath == '' || directoryPath.characters.first == '.') {
       setState(() {
         _files = [];
       });
@@ -95,10 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final directory = Directory(directoryPath);
-
     try {
       final filesList = directory.list();
-      // debugPrint(filesList)
       Iterable<FileSystemEntity> files = await filesList.toList();
       files = files.where((file) =>
           file.statSync().type == FileSystemEntityType.file ||
@@ -108,7 +105,13 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } catch (e) {
       // Handle errors, e.g., show a snackbar or dialog
+      debugPrint(e.toString());
     }
+  }
+
+  void _updateTextField(String basename) {
+    _directoryController.text = '${_directoryController.text}/$basename';
+    _scanDirectory();
   }
 
   ListView _buildList() {
@@ -121,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return FileListItem(
           file: file,
           tileColor: index % 2 == 0 ? Colors.grey.shade200 : null,
+          updatePath: _updateTextField,
         );
       },
       // physics: const BouncingScrollPhysics(),
@@ -188,6 +192,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontSize: 18,
                       ),
                       decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                List<String> pathParts =
+                                    _directoryController.text.split('/');
+                                pathParts.removeLast();
+                                String newPath = pathParts.join('/');
+                                _directoryController.text = newPath;
+                                _scanDirectory();
+                              },
+                              icon: const Icon(FontAwesomeIcons.arrowLeft), color: Colors.white),
                           enabledBorder: const UnderlineInputBorder(
                               borderSide: BorderSide(
                                   color: Colors.white,
