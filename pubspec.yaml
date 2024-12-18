@@ -1,5 +1,5 @@
 name: file_info
-description: "A new Flutter project."
+description: "Fetch file information quickly."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,6 +33,7 @@ dependencies:
   
   path: ^1.9.0
   intl: ^0.20.0
+  permission_handler: ^11.3.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
