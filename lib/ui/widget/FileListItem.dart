@@ -36,7 +36,7 @@ class FileListItem extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    DateFormat dateFormat = DateFormat('MM/dd/yyyy hh:mm a');
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy hh:mm a');
     return dateFormat.format(date);
   }
 
